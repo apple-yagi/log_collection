@@ -5,11 +5,16 @@ use std::fs;
 use std::fs::File;
 use std::io;
 use std::io::Write;
+use std::io::{Error, ErrorKind};
 
 // ファイルを読み込む関数
 pub fn cat(path: &String) -> Result<String, io::Error> {
     let content = fs::read_to_string(path)?;
-    Ok(content)
+
+    match content.len() {
+        0 => Err(Error::new(ErrorKind::Other, "Log is empty")),
+        _ => Ok(content),
+    }
 }
 
 // ファイルを書き込む関数
@@ -47,9 +52,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     dotenv().ok();
 
     let access_log_path = env::var("ACCESS_LOG_PATH").expect("ACCESS_LOG_PATH is not defined");
-    let access_dir_path = env::var("ACCESS_DIR_PATH").expect("DIR_PATH is not defined");
+    let access_dir_path = env::var("ACCESS_DIR_PATH").expect("ACCESS_DIR_PATH is not defined");
     let error_log_path = env::var("ERROR_LOG_PATH").expect("ACCESS_LOG_PATH is not defined");
-    let error_dir_path = env::var("ERROR_DIR_PATH").expect("DIR_PATH is not defined");
+    let error_dir_path = env::var("ERROR_DIR_PATH").expect("ERROR_DIR_PATH is not defined");
 
     match log_collection(access_log_path, access_dir_path) {
         Ok(()) => println!("Success!!"),
