@@ -29,17 +29,10 @@ pub fn write(dirpath: String, content: String) -> Result<(), io::Error> {
 // 一連のファイル操作
 pub fn log_collection(log_path: String, out_path: String) -> Result<(), io::Error> {
     // ログを読み込む
-    let mut content = String::new();
-    match cat(&log_path) {
-        Ok(result) => content = result,
-        Err(err) => println!("failure cat function: {}", err),
-    }
+    let content = cat(&log_path)?;
 
     // ログを別ファイルに書き込む
-    match write(out_path, content) {
-        Ok(()) => (),
-        Err(err) => println!("failure write function: {}", err),
-    }
+    write(out_path, content)?;
 
     // ログを削除
     fs::remove_file(&log_path)?;
