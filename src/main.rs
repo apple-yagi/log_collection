@@ -3,6 +3,7 @@ use dotenv::dotenv;
 use std::env;
 use std::fs;
 use std::fs::File;
+use std::fs::OpenOptions;
 use std::io;
 use std::io::Write;
 use std::io::{Error, ErrorKind};
@@ -39,12 +40,13 @@ pub fn log_collection(log_path: String, out_path: String) -> Result<(), io::Erro
     // ログを別ファイルに書き込む
     write(out_path, content)?;
 
-    // ログを削除
-    fs::remove_file(&log_path)?;
+    // ログを空にする
+    let mut file = OpenOptions::new()
+        .write(true)
+        .truncate(true)
+        .open(log_path)?;
+    file.flush()?;
 
-    // 空のログファイルを生成
-    let mut f = File::create(&log_path)?;
-    f.flush()?;
     Ok(())
 }
 
@@ -53,7 +55,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let access_log_path = env::var("ACCESS_LOG_PATH").expect("ACCESS_LOG_PATH is not defined");
     let access_dir_path = env::var("ACCESS_DIR_PATH").expect("ACCESS_DIR_PATH is not defined");
-    let error_log_path = env::var("ERROR_LOG_PATH").expect("ACCESS_LOG_PATH is not defined");
+    let error_log_path = env::var("ERROR_LOG_PATH").expect("ERROR_LOG_PATH is not defined");
     let error_dir_path = env::var("ERROR_DIR_PATH").expect("ERROR_DIR_PATH is not defined");
 
     match log_collection(access_log_path, access_dir_path) {
