@@ -19,12 +19,8 @@ pub fn cat(path: &String) -> Result<String, io::Error> {
 }
 
 // ファイルを書き込む関数
-pub fn write(dirpath: String, content: String) -> Result<(), io::Error> {
-    // ファイル名は現在の日付
-    let filename = Local::now().format("%Y_%m_%d").to_string();
-
-    let fullpath = dirpath + &filename;
-    let mut file = File::create(fullpath)?;
+pub fn write(output_path: String, content: String) -> Result<(), io::Error> {
+    let mut file = File::create(output_path)?;
     write!(file, "{}", content)?;
 
     // 書き込みのエラーハンドリング
@@ -58,12 +54,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let error_log_path = env::var("ERROR_LOG_PATH").expect("ERROR_LOG_PATH is not defined");
     let error_dir_path = env::var("ERROR_DIR_PATH").expect("ERROR_DIR_PATH is not defined");
 
-    match log_collection(access_log_path, access_dir_path) {
+    // ファイル名は現在の日付
+    let filename = Local::now().format("%Y_%m_%d").to_string();
+
+    match log_collection(access_log_path, access_dir_path + &filename) {
         Ok(()) => println!("Success!!"),
         Err(err) => println!("failure: {}", err),
     }
 
-    match log_collection(error_log_path, error_dir_path) {
+    match log_collection(error_log_path, error_dir_path + &filename) {
         Ok(()) => println!("Success!!"),
         Err(err) => println!("failure: {}", err),
     }
